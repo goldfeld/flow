@@ -110,7 +110,7 @@
 
 (defn config->flow
   "Converts from workflow config format to the flow seq accepted by
-  the dow.flow/flow function. The config format is nicer for humans
+  the flow.core/flow function. The config format is nicer for humans
   because it's less repetitive and more declarative, while the proper
   execution works better with a more procedural structure. See the
   README for example config data and what flow structures they
