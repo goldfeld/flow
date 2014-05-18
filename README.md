@@ -34,7 +34,7 @@ The config will translate into the following flow structure:
 
 As you can see, the first two "tracks" (work and play) had two blocks,
 so they were perfectly interleaved, and the single break block was put
-last by using the ":.." syntax. When one track has more blocks than
+last by using the `:..` syntax. When one track has more blocks than
 the others, it will predictably go on to finish all its extra blocks
 in a row after the other tracks are done. If a track has less blocks
 than the others, it will end sooner. However, you can do this:
@@ -46,7 +46,7 @@ than the others, it will end sooner. However, you can do this:
 
 Which will effectively execute two play blocks in a row after the
 first work block, and only then execute the last work and play
-blocks. Note that ":." is not the same as "0"; the former will skip
+blocks. Note that `:.` is not the same as `0`; the former will skip
 the block's action and/or alert, whereas the latter will still execute
 those.
 
