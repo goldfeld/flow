@@ -32,7 +32,7 @@
    [5 :min go-to-web-browser]]"
   ([flow-seq clock-name os-fns last-timer]
      (js/clearInterval last-timer)
-     (flow flow-seq os-fns))
+     (flow flow-seq clock-name os-fns))
   ([[now & then] clock-name os-fns]
      (if now
        (let [status ((last now))
