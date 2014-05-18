@@ -16,7 +16,7 @@ Here is an example of a simple config:
 ``` Clojure
 [["working.." [25 25 :min] :exec "emacs my-work-file.clj"]
  ["playing!" [5 5 :min] :exec "emacs -f tetris"]
- ["break" [:.. 15]]]
+ ["break" [:.. 15 :min]]]
 ```
 
 The action to be executed at the end (e.g. :exec "(shell command)")
@@ -40,8 +40,8 @@ in a row after the other tracks are done. If a track has less blocks
 than the others, it will end sooner. However, you can do this:
 
 ``` Clojure
-[["work track" [25 :. 25]
- ["play track" [5  5  5]]
+[["work track" [25 :. 25 :min]
+ ["play track" [5  5  5 :min]]
 ```
 
 Which will effectively execute two play blocks in a row after the
