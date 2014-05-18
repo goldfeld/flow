@@ -64,7 +64,7 @@
    DurationUnit])
 
 (defschema ConfigSeq
-  [(s/one s/String "Label")
+  [(s/one s/Str "Label")
    (s/one BlockSeq "blockseq")
    (s/one s/Keyword "ActionType")
    s/Any])
