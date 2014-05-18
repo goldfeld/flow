@@ -62,9 +62,10 @@
                 (fn [handle]
                   (let [left (- target (now-ms))
                         show (ms->display left seconds)
-                        prefix (when (count label) (str label " "))]
+                        prefix (when (count label) (str label " "))
+                        execute-alert (:execute-alert os-fns)]
                     (when (and (< left 10000) (= (rem (quot left 1000) 3) 1))
-                      ((:execute-alert os-fns)))
+                      (execute-alert))
                     ((:set-clock-content os-fns) handle (str prefix show)))
                   ((:render-clock os-fns)))
                 seconds)))
