@@ -88,7 +88,7 @@
   [create-action target-length lead-up-length [label block-seq & args]]
   (let [durations (butlast (sans-lead-up block-seq (> lead-up-length 0)))
         duration-unit (last block-seq)
-        action (apply create-action (if (= (count args))
+        action (apply create-action (if (= 1 (count args))
                                       (:on-start args)
                                       args))]
     (concat
