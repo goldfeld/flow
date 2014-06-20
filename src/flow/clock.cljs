@@ -1,5 +1,8 @@
 (ns flow.clock)
 
+(defn now [] (js/Date.))
+(defn now-ms [] (.getTime (js/Date.)))
+
 (def *clocks* (atom {}))
 
 (defn create-clock
@@ -15,20 +18,24 @@
 (defn get-clock [name]
   (@*clocks* name))
 
-(defn pad-time [i]
+(defn pad-date [i]
   (if (< i 10)
     (str "0" i)
     (str i)))
 
-(defn now-ms []
-  (.getTime (js/Date.)))
+(defn format-date
+  ([d] (format-date d true))
+  ([d day]
+     (str (.getFullYear d) "/"
+          (pad-date (inc (.getMonth d)))
+          (when day (str "/" (pad-date (.getDate d)))))))
 
 (defn format-time
   ([t] (format-time t false))
   ([t seconds]
-     (str (pad-time (.getHours t)) ":"
-          (pad-time (.getMinutes t))
-          (when seconds (str ":" (pad-time (.getSeconds t)))))))
+     (str (pad-date (.getHours t)) ":"
+          (pad-date (.getMinutes t))
+          (when seconds (str ":" (pad-date (.getSeconds t)))))))
 
 (defn set-clock
   ([name set-clock-fn] (set-clock name set-clock-fn false))
@@ -53,7 +60,7 @@
         rem (- ms (* h 3600000))
         m (int (/ rem 60000))
         s (int (/ (- rem (* m 60000)) 1000))]
-    (str (pad-time h) ":" (pad-time m) (when seconds (str ":" (pad-time s))))))
+    (str (pad-date h) ":" (pad-date m) (when seconds (str ":" (pad-date s))))))
 
 (defn set-timer
   ([name target label os-fns] (set-timer name target label os-fns false))
