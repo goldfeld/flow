@@ -12,7 +12,6 @@
   :source-paths ["src"]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2202"]
-                 [com.cemerick/double-check "0.5.7-SNAPSHOT"]
                  [prismatic/schema "0.2.2"]]
   :node-dependencies [[phantomjs "1.9.x"]]
   :cljsbuild {:builds [{:id "test"

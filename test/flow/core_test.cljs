@@ -2,11 +2,7 @@
   (:require [flow.core :as flow]
             [schema.core :as s]
             [cemerick.cljs.test
-             :include-macros true :refer [deftest is testing]]
-            [cemerick.double-check.clojure-test :as tc
-             :include-macros true :refer [defspec]]
-            [cemerick.double-check.generators :as gen]
-            [cemerick.double-check.properties :as prop :include-macros true]))
+             :include-macros true :refer [deftest is testing]]))
 
 (deftest parse-simple-config->flow
   (let [Block (s/one flow/Block "Block")]
