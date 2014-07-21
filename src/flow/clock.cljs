@@ -1,7 +1,5 @@
-(ns flow.clock)
-
-(defn now [] (js/Date.))
-(defn now-ms [] (.getTime (js/Date.)))
+(ns flow.clock
+  (:require [flow.datetime :as dt]))
 
 (def *clocks* (atom {}))
 
@@ -18,25 +16,6 @@
 (defn get-clock [name]
   (@*clocks* name))
 
-(defn pad-date [i]
-  (if (< i 10)
-    (str "0" i)
-    (str i)))
-
-(defn format-date
-  ([d] (format-date d true))
-  ([d day]
-     (str (.getFullYear d) "/"
-          (pad-date (inc (.getMonth d)))
-          (when day (str "/" (pad-date (.getDate d)))))))
-
-(defn format-time
-  ([t] (format-time t false))
-  ([t seconds]
-     (str (pad-date (.getHours t)) ":"
-          (pad-date (.getMinutes t))
-          (when seconds (str ":" (pad-date (.getSeconds t)))))))
-
 (defn set-clock
   ([name set-clock-fn] (set-clock name set-clock-fn false))
   ([name set-clock-fn seconds]
@@ -51,24 +30,17 @@
   ([name {display :set-clock-content render :render-clock} seconds]
      (set-clock name
                 (fn [handle]
-                  (display handle (format-time (js/Date.) seconds))
+                  (display handle (dt/time-display (js/Date.) seconds))
                   (render))
                 seconds)))
-
-(defn ms->display [ms seconds]
-  (let [h (int (/ ms 3600000))
-        rem (- ms (* h 3600000))
-        m (int (/ rem 60000))
-        s (int (/ (- rem (* m 60000)) 1000))]
-    (str (pad-date h) ":" (pad-date m) (when seconds (str ":" (pad-date s))))))
 
 (defn set-timer
   ([name target label os-fns] (set-timer name target label os-fns false))
   ([name target label os-fns seconds]
      (set-clock name
                 (fn [handle]
-                  (let [left (- target (now-ms))
-                        show (ms->display left seconds)
+                  (let [left (- target (dt/now-ms))
+                        show (dt/ms->display left seconds)
                         prefix (when (count label) (str label " "))
                         execute-alert (:execute-alert os-fns)]
                     (when (and (< left 10000) (= (rem (quot left 1000) 3) 1))

@@ -1,7 +1,8 @@
 (ns flow.core
   (:require-macros [schema.macros :refer [defschema =>]])
   (:require [schema.core :as s]
-            [flow.clock :refer [now-ms set-timer set-current-time]]))
+            [flow.datetime :refer [now-ms]]
+            [flow.clock :refer [set-timer set-current-time]]))
 
 (defschema DurationUnit
   (s/one (s/enum :min :s :h :d :ms) "DurationUnit"))
