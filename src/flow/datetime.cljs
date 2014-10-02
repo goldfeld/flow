@@ -72,3 +72,8 @@
      (str (pad-date (.getHours t)) ":"
           (pad-date (.getMinutes t))
           (when seconds (str ":" (pad-date (.getSeconds t)))))))
+
+(defn add-days [dt days]
+  (let [target (js/Date. (.valueOf dt))]
+    (.setDate target (+ (.getDate target) days))
+    target))
