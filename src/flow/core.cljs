@@ -7,13 +7,13 @@
 (defschema DurationUnit
   (s/one (s/enum :min :s :h :d :ms) "DurationUnit"))
 
-(defn ->ms [i unit]
+(defn ->ms [d unit]
   (case unit
-    :min (* i 1000 60)
-    :s (* i 1000)
-    :h (* i 1000 60 60)
-    :d (* i 1000 60 60 24)
-    i))
+    :min (* d 1000 60)
+    :s (* d 1000)
+    :h (* d 1000 60 60)
+    :d (* d 1000 60 60 24)
+    d))
 
 (defn flow
   "Starts a workflow, and expects a flow seq as a minimum argument.
@@ -31,22 +31,23 @@
    [5 :min go-to-web-browser]
    [25 :min go-do-work]
    [5 :min go-to-web-browser]]"
-  ([flow-seq clock-name os-fns last-timer]
+  ([flow-seq options os-fns last-timer]
      (js/clearInterval last-timer)
-     (flow flow-seq clock-name os-fns))
-  ([[now & then] clock-name os-fns]
+     (flow flow-seq options os-fns))
+  ([[now & then] {:keys [clock-id callback]} os-fns]
      (if now
        (let [status ((last now))
              delta (->ms (first now) (second now))
-             args (if-not clock-name
+             args (if-not clock-id
                     [then nil nil]
-                    [then clock-name os-fns (set-timer
-                                             clock-name (+ (now-ms) delta)
-                                             status os-fns :seconds)])]
+                    [then clock-id os-fns (set-timer
+                                           clock-id (+ (now-ms) delta)
+                                           status os-fns :seconds)])]
+         (when callback (callback))
          (js/setTimeout #(apply flow args) delta))
-       (when clock-name (set-current-time clock-name os-fns :seconds))))
-  ([flow-seq clock-name] (flow flow-seq clock-name {:set-clock-content identity
-                                                    :render-clock identity}))
+       (when clock-id (set-current-time clock-id os-fns :seconds))))
+  ([flow-seq options] (flow flow-seq options {:set-clock-content identity
+                                              :render-clock identity}))
   ([flow-seq] (flow flow-seq nil nil)))
 
 (defn has-lead-up?
@@ -86,17 +87,28 @@
   interleaving); a lead-up-length which informs if we should add lead
   up nil-block padding (when the block-seq starts with \":..\") and
   how much; and finally the config-seq itself."
-  [create-action target-length lead-up-length [label block-seq & args]]
-  (let [durations (butlast (sans-lead-up block-seq (> lead-up-length 0)))
-        duration-unit (last block-seq)
-        action (apply create-action (if (= 1 (count args))
-                                      (:on-start args)
-                                      args))]
-    (concat
-     (repeat lead-up-length nil)
-     (map #(when (not= :. %) [% duration-unit (fn [] (action) label)])
-          durations)
-     (repeat (- target-length (count durations)) nil))))
+  ([create-action target-length lead-up-length config-seq]
+     (recur create-action target-length lead-up-length nil config-seq))
+  ([create-action target-length lead-up-length trackno [label block-seq & args]]
+     (let [durations (butlast (sans-lead-up block-seq (> lead-up-length 0)))
+           duration-unit (last block-seq)
+           action (apply create-action (if (= 1 (count args))
+                                         (:on-start args)
+                                         args))]
+       (concat
+        (repeat lead-up-length nil)
+        (map-indexed (fn [i d] (when (not= :. d) [d duration-unit
+                                                  (fn []
+                                                    {:output (action)
+                                                     :track-label label
+                                                     :track-number trackno
+                                                     :block-number (inc i)
+                                                     :block-length d
+                                                     :block-unit duration-unit
+                                                     :block-ms
+                                                     (->ms d duration-unit)})]))
+                     durations)
+        (repeat (- target-length (count durations)) nil)))))
 
 (defn get-target-length
   "Gets the biggest length of blocks (durations) among a group of
@@ -118,19 +130,20 @@
   produce."
   ([config-seqs] (config->flow #(fn [] nil) config-seqs))
   ([create-action config-seqs]
-     (let [{lead-config-seqs false
+     (let [{track-config-seqs false
             trail-config-seqs true} (group-by #(has-lead-up? (second %))
-                                              config-seqs)
-           lead-up-length (get-target-length (map second lead-config-seqs))
-           trail-length (get-target-length (map second trail-config-seqs))
-           ->flow (partial config->flow create-action)]
+            config-seqs)
+            lead-up-length (get-target-length (map second track-config-seqs))
+            trail-length (get-target-length (map second trail-config-seqs))
+            ->flow (partial config->flow create-action)]
        (concat
-        (->flow lead-up-length 0 lead-config-seqs)
-        (->flow trail-length lead-up-length trail-config-seqs))))
-  ([create-action target-length lead-up-length config-seqs]
+        (->flow lead-up-length 0 :add-trackno track-config-seqs)
+        (->flow trail-length lead-up-length false trail-config-seqs))))
+  ([create-action target-length lead-up-length add-trackno? config-seqs]
+     (let [mapper (if add-trackno? map-indexed map)])
      (->> config-seqs
-          (map (partial config-seq->blocks create-action
-                        target-length lead-up-length))
+          (mapper (partial config-seq->blocks create-action
+                           target-length lead-up-length))
           (#(if (> (count %) 1)
               (apply interleave %)
               (first %)))
