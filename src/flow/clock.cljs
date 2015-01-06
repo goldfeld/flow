@@ -36,15 +36,14 @@
 
 (defn set-timer
   ([name target label os-fns] (set-timer name target label os-fns false))
-  ([name target label os-fns seconds]
+  ([name target label {:keys [execute-alert render-clock] :as os-fns} seconds]
      (set-clock name
                 (fn [handle]
                   (let [left (- target (dt/now-ms))
                         show (dt/ms->display left seconds)
-                        prefix (when (count label) (str label " "))
-                        execute-alert (:execute-alert os-fns)]
+                        prefix (when (count label) (str label " "))]
                     (when (and (< left 10000) (= (rem (quot left 1000) 3) 1))
                       (execute-alert))
                     ((:set-clock-content os-fns) handle (str prefix show)))
-                  ((:render-clock os-fns)))
+                  (render-clock))
                 seconds)))

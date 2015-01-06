@@ -1,7 +1,7 @@
 (ns flow.core
   (:require-macros [schema.macros :refer [defschema =>]])
   (:require [schema.core :as s]
-            [flow.datetime :refer [now-ms]]
+            [flow.datetime :as dt]
             [flow.clock :refer [set-timer set-current-time]]))
 
 (defschema DurationUnit
@@ -14,6 +14,46 @@
     :h (* d 1000 60 60)
     :d (* d 1000 60 60 24)
     d))
+
+(def flows (atom {}))
+(def aliases (atom {}))
+
+(defn register-flow-alias [alias flow-id]
+  (swap! aliases assoc alias flow-id))
+
+(def should-ignore-next-action (atom nil))
+
+(defn get-flow-info [flow-id]
+  (if-let [info (flow-id @flows)]
+    info
+    (if-let [info (flow-id @aliases)]
+      info
+      nil)))
+
+(defn set-flow-info [flow-id key info]
+  
+  (swap! flows update-in [()]))
+
+(defn ignore-next-action!
+  ([] (ignore-next-action! :last))
+  ([flow-id] (set-flow-info flow-id :ignore-next-action true))
+
+  (let [id ]
+    (if flow-data
+      (swap! flows update-in [id :ignore-next-action] (constantly true))
+      (throw (str "No running flow for supplied id"
+                  " (did you fail to register an alias?)")))))
+
+(defn may-ignore-action [action]
+  (if @should-ignore-next-action
+    "action ignored"
+    (action))
+  (reset! should-ignore-next-action nil))
+
+(defn update-flow-info [info flow-id {:keys [handle timer]}]
+  (-> m
+      (update-in [flow-id :handle] handle)
+      (update-in [flow-id :timer] timer)))
 
 (defn flow
   "Starts a workflow, and expects a flow seq as a minimum argument.
@@ -34,10 +74,7 @@
   ([flow-seq options os-fns last-timer]
      (js/clearInterval last-timer)
      (flow flow-seq options os-fns))
-  ([[now & then] {:keys [clock-id callback]} os-fns]
-     (if now
-       (let [status ((last now))
-             delta (->ms (first now) (second now))
+<<<<<<< Updated upstream
              args (if-not clock-id
                     [then nil nil]
                     [then clock-id os-fns (set-timer
@@ -49,6 +86,30 @@
   ([flow-seq options] (flow flow-seq options {:set-clock-content identity
                                               :render-clock identity}))
   ([flow-seq] (flow flow-seq nil nil)))
+=======
+  ([[now & then] {:keys [clock-id flow-id callback]] os-fns
+    (if now
+      (let [status (may-ignore-action (last now) )
+            delta (->ms (first now) (second now))
+            info {:handle (js/setTimeout #(flow then options os-fns) delta)
+                  :timer (when clock-id (set-timer clock-id
+                                                   (+ (dt/now-ms) delta)
+                                                   status os-fns :seconds))}]
+        (when callback (callback))
+        (swap! flows update-flows-info :last info)
+        (swap! flows (fn [m]
+                       (let [m' (if )])
+                       (-> m
+                           (update-in [:last :handle] handle)
+                           (update-in [:last :handle] handle)
+                           (update-in [:last :handle] handle)
+                           (update-in [:last :handle] handle))
+                       (apply assoc m' :last info))))
+      (when clock-id (set-current-time clock-id os-fns :seconds))))
+     ([flow-seq options] (flow flow-seq options {:set-clock-content identity
+                                                 :render-clock identity}))
+     ([flow-seq] (flow flow-seq nil {}))))
+>>>>>>> Stashed changes
 
 (defn has-lead-up?
   [block-seq]
