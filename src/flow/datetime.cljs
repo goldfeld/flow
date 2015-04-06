@@ -94,7 +94,7 @@
         year-start (js/Date. (year t) 0 1)]
     (.setHours ref 0 0 0)
     (.setDate ref (get-date-for-nearest-weekday t 4))
-    (.ceil js/Math (-> (- ref year-start)
+    (.ceil js/Math (-> (- (.getTime ref) (.getTime year-start))
                        (/ 86400000)
                        inc
                        (/ 7)
