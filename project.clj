@@ -1,4 +1,4 @@
-(defproject flow "0.1.4"
+(defproject flow "0.1.5"
   :description "Clocks, timers and workflows in Clojure(Script)"
   :url "http://github.com/goldfeld/flow"
   :license {:name "Eclipse Public License"
