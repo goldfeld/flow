@@ -77,3 +77,32 @@
   (let [target (js/Date. (.valueOf dt))]
     (.setDate target (+ (.getDate target) days))
     target))
+
+(defn get-date-for-nearest-weekday
+  "Supply a datetime and a weekday (0 for Sunday through 6 for
+  Saturday) and get back the day of month for that weekday which is
+  closest to the datetime. Note that in the calculation inside, Sunday
+  is given the value 7 instead of 0."
+  [t weekday]
+  (let [day-of-week (day-of-week t)]
+    (+ weekday
+       (- (day-of-month t)
+          (if (zero? day-of-week) 7 day-of-week)))))
+
+(defn get-week-no [t]
+  (let [ref (js/Date. t)
+        year-start (js/Date. (year t) 0 1)]
+    (.setHours ref 0 0 0)
+    (.setDate ref (get-date-for-nearest-weekday t 4))
+    (.ceil js/Math (-> (- ref year-start)
+                       (/ 86400000)
+                       inc
+                       (/ 7)
+                       pad-date))))
+
+(defn daysuf [date]
+  (str date (cond
+              (some #{1 21 31} [date]) "st"
+              (some #{2 22} [date]) "nd"
+              (some #{3 23} [date]) "rd"
+              :else "th")))
