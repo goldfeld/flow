@@ -140,11 +140,11 @@
         (->flow lead-up-length 0 :add-trackno track-config-seqs)
         (->flow trail-length lead-up-length false trail-config-seqs))))
   ([create-action target-length lead-up-length add-trackno? config-seqs]
-     (let [mapper (if add-trackno? map-indexed map)])
+   (let [mapper (if add-trackno? map-indexed map)]
      (->> config-seqs
           (mapper (partial config-seq->blocks create-action
                            target-length lead-up-length))
           (#(if (> (count %) 1)
               (apply interleave %)
               (first %)))
-          (keep identity))))
+          (keep identity)))))
