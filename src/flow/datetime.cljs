@@ -1,6 +1,12 @@
-(ns flow.datetime)
+(ns flow.datetime
+  #_(:require [cljs.core.typed :as t :include-macros true]))
+
+#_(t/defalias Milliseconds
+  t/Int)
 
 (defn now [] (js/Date.))
+
+#_(t/ann now-ms [-> Milliseconds])
 (defn now-ms [] (.getTime (js/Date.)))
 
 (defn pad-date [i]

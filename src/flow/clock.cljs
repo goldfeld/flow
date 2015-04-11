@@ -1,5 +1,12 @@
 (ns flow.clock
-  (:require [flow.datetime :as dt]))
+  (:require #_[cljs.core.typed :as t :include-macros true]
+            [flow.datetime :as dt]))
+
+#_(t/defalias Clock
+  t/Any)
+
+#_(t/defalias Timer
+  t/Any)
 
 (def *clocks* (atom {}))
 
