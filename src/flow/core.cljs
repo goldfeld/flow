@@ -82,7 +82,7 @@
                                (when clock-id
                                  (clock/set-timer
                                   clock-id (+ (dt/now-ms) delta)
-                                  (:output info) os-fns :seconds)))]
+                                  (:track-label info) os-fns :seconds)))]
          (a/put! chan {:flow :block-start :msg info})
          (js/setTimeout (fn []
                           (a/put! chan {:flow :block-end :msg info})
