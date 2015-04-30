@@ -86,14 +86,15 @@
 
 (defn get-date-for-nearest-weekday
   "Supply a datetime and a weekday (0 for Sunday through 6 for
-  Saturday) and get back the day of month for that weekday which is
-  closest to the datetime. Note that in the calculation inside, Sunday
-  is given the value 7 instead of 0."
+  Saturday) and get back an integer vector with the month and the day
+  of month for that weekday which is closest to the datetime. Note
+  that in the calculation inside, Sunday is given the value 7 instead
+  of 0."
   [t weekday]
-  (let [day-of-week (day-of-week t)]
-    (+ weekday
-       (- (day-of-month t)
-          (if (zero? day-of-week) 7 day-of-week)))))
+  (let [day-of-week (day-of-week t)
+        nearest (->> (- weekday (if (zero? day-of-week) 7 day-of-week))
+                     (add-days t))]
+    [(month nearest) (day-of-month nearest)]))
 
 (defn get-week-no [t]
   (let [ref (js/Date. t)
